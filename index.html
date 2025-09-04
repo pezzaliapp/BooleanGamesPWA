@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Boolean Games — PezzaliAPP</title>
+  <meta name="description" content="Sei mini-giochi di logica booleana: Verità o Falso, Karnaugh 3/4v, SAT, Quine–McCluskey, Circuiti logici." />
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <meta name="theme-color" content="#0f172a">
+  <style>
+    :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --accent:#22c55e; --danger:#ef4444; --card:#111827; --btn:#1f2937; }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
+    header{position:sticky;top:0;z-index:10;background:linear-gradient(0deg,rgba(15,23,42,.9),rgba(15,23,42,1));backdrop-filter:blur(6px);border-bottom:1px solid #1f2937}
+    .wrap{max-width:980px;margin:0 auto;padding:16px}
+    .title{display:flex;align-items:center;gap:12px}
+    .title h1{font-size:20px;margin:0}
+    nav{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    button,.btn{background:var(--btn);color:var(--fg);border:1px solid #374151;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
+    button:hover{filter:brightness(1.1)}
+    .pill{display:inline-block;padding:6px 10px;border-radius:9999px;border:1px solid #334155;background:#0b1220;color:var(--muted);font-size:12px}
+    main .section{display:none}
+    main .section.active{display:block}
+    .card{background:var(--card);border:1px solid #1f2937;padding:16px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+    .grid{display:grid;gap:12px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .big{font-size:clamp(18px,3vw,28px)}
+    .mono{font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .ok{color:var(--accent)} .bad{color:var(--danger)}
+    .kmap{display:grid;grid-template-columns:80px repeat(4,64px);grid-auto-rows:64px;border:1px solid #334155;border-radius:12px;overflow:hidden}
+    .kcell,.khead{display:flex;align-items:center;justify-content:center;border:1px solid #334155}
+    .khead{background:#0b1220;color:var(--muted);font-weight:700}
+    .kcell{cursor:pointer;font-size:20px}
+    .kcell.active{background:#0a1f14;outline:2px solid #14532d}
+    .legend{color:var(--muted);font-size:13px}
+    .spacer{height:8px}
+    .kmap4{grid-template-columns:80px repeat(4,56px);grid-auto-rows:56px}
+    .clauses{display:flex;flex-wrap:wrap;gap:8px}
+    .clause{border:1px solid #334155;background:#0b1220;border-radius:9999px;padding:8px 12px;display:flex;align-items:center;gap:8px}
+    .clause.ok{border-color:#14532d;background:#0a1f14;color:#86efac}
+    .toggles{display:flex;gap:8px}
+    .toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid #334155;background:#0b1220;padding:8px 12px;border-radius:12px;cursor:pointer}
+    .toggle input{transform:scale(1.2)}
+    .node{position:absolute;min-width:140px;background:#111827;border:1px solid #334155;border-radius:12px;padding:8px;cursor:grab;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+    .node:active{cursor:grabbing}
+    .node .head{font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+    .node .body{display:flex;gap:6px;align-items:center}
+    .node select{background:#0b1220;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:4px}
+    .badge{font-size:11px;color:#94a3b8}
+  </style>
+  <script>
+    function show(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+    window.addEventListener('DOMContentLoaded',()=>{
+      show('home');
+      try{
+        if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
+          navigator.serviceWorker.register('sw.js').catch(()=>{});
+        }
+      }catch(e){}
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="title">
+        <img src="icon-192.png" width="28" height="28" style="border-radius:6px" alt="icon"/>
+        <h1>Boolean Games <span class="pill">PWA • offline</span></h1>
+      </div>
+      <nav>
+        <button onclick="show('home')">🏠 Home</button>
+        <button onclick="show('vf')">🧮 Verità o Falso</button>
+        <button onclick="show('kmap')">🗺️ K-map (3 variabili)</button>
+        <button onclick="show('sat')">🧩 SAT 3-CNF</button>
+        <button onclick="show('kmap4')">🗺️ K-map (4 variabili)</button>
+        <button onclick="show('qm')">🧠 Quine–McCluskey</button>
+        <button onclick="show('circuit')">🔌 Circuiti logici</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="home" class="section active">
+      <div class="card grid">
+        <div>
+          <div class="big">Sei mini-giochi sulla logica booleana.</div>
+          <ul>
+            <li><strong>Verità o Falso</strong> — valuta un'espressione su A,B,C.</li>
+            <li><strong>Karnaugh 3v</strong> — mappa 2×4 (BC in Gray: 00,01,11,10).</li>
+            <li><strong>SAT 3-CNF</strong> — imposta A,B,C per soddisfare tutte le clausole.</li>
+            <li><strong>Karnaugh 4v</strong> — mappa 4×4 (AB/CD in Gray).</li>
+            <li><strong>Quine–McCluskey</strong> — minimizzazione fino a 4 variabili con passaggi.</li>
+            <li><strong>Circuiti</strong> — porte AND/OR/NOT/XOR collegabili, simulazione live.</li>
+          </ul>
+          <div class="row"><span>Totale: <strong id="scoreTotal">0</strong> • Best: <strong id="scoreBest">0</strong></span><button onclick="resetBest()">Azzera Best</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="vf" class="section">
+      <div class="card grid">
+        <div class="row"><button onclick="VF.newRound()">Nuovo</button><button onclick="VF.hint()">Hint</button></div>
+        <div class="row big mono"><span>Assegnazione:</span><span id="vfAssign"></span></div>
+        <div class="big mono" id="vfExpr"></div>
+        <div id="vfHint" class="legend"></div>
+        <div class="row"><button onclick="VF.answer(true)">Vero</button><button onclick="VF.answer(false)">Falso</button></div>
+        <div id="vfFeedback"></div>
+      </div>
+    </section>
+
+    <section id="kmap" class="section">
+      <div class="card grid">
+        <div class="row"><button onclick="KMAP.newPuzzle()">Nuovo</button><button onclick="KMAP.hint()">Hint</button><button onclick="KMAP.check()">Check</button><button onclick="KMAP.solve()">Soluzione</button><button onclick="KMAP.clear()">Pulisci</button></div>
+        <div class="legend">Variabili: A (righe), B C (colonne in Gray: 00,01,11,10)</div>
+        <div class="spacer"></div>
+        <div class="kmap" id="kmapGrid"></div>
+        <div class="spacer"></div>
+        <div class="mono">Funzione: <span id="kmapExpr"></span></div>
+        <div id="kmapMsg"></div>
+      </div>
+    </section>
+
+    <section id="sat" class="section">
+      <div class="card grid">
+        <div class="row"><button onclick="SAT.newPuzzle()">Nuovo</button><button onclick="SAT.hint()">Hint</button><button onclick="SAT.reset()">Reset</button></div>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="satA" onchange="SAT.update()">A</label>
+          <label class="toggle"><input type="checkbox" id="satB" onchange="SAT.update()">B</label>
+          <label class="toggle"><input type="checkbox" id="satC" onchange="SAT.update()">C</label>
+        </div>
+        <div class="clauses" id="satClauses"></div>
+        <div id="satMsg"></div>
+      </div>
+    </section>
+
+    <section id="kmap4" class="section">
+      <div class="card grid">
+        <div class="row"><button onclick="KMAP4.newPuzzle()">Nuovo</button><button onclick="KMAP4.hint()">Hint</button><button onclick="KMAP4.check()">Check</button><button onclick="KMAP4.solve()">Soluzione</button><button onclick="KMAP4.clear()">Pulisci</button></div>
+        <div class="legend">Variabili: AB (righe Gray: 00,01,11,10) • CD (colonne Gray: 00,01,11,10)</div>
+        <div class="spacer"></div>
+        <div class="kmap kmap4" id="kmap4Grid"></div>
+        <div class="spacer"></div>
+        <div class="mono">Funzione: <span id="kmap4Expr"></span></div>
+        <div id="kmap4Msg"></div>
+      </div>
+    </section>
+
+    <section id="qm" class="section">
+      <div class="card grid">
+        <div class="row">
+          <button onclick="QM.newRandom(4)">Nuovo (4 variabili)</button>
+          <button onclick="QM.newRandom(3)">Nuovo (3 variabili)</button>
+          <button onclick="QM.showSteps()">Mostra passaggi</button>
+          <button onclick="QM.copyResult()">Copia risultato</button>
+        </div>
+        <div class="legend">Minimizzazione con implicanti primi ed essenziali. Variabili: A..D.</div>
+        <div class="mono">Minterms: <span id="qmMinterms"></span> <span id="qmDontcares"></span></div>
+        <div class="mono">Forma minima: <span id="qmResult"></span></div>
+        <details id="qmStepsBox"><summary>Passaggi</summary>
+          <pre id="qmSteps" class="mono" style="white-space:pre-wrap"></pre>
+        </details>
+      </div>
+    </section>
+
+    <section id="circuit" class="section">
+      <div class="card grid">
+        <div class="row">
+          <div class="toggles">
+            <label class="toggle"><input type="checkbox" id="inA" onchange="CIRCUIT.update()">A</label>
+            <label class="toggle"><input type="checkbox" id="inB" onchange="CIRCUIT.update()">B</label>
+            <label class="toggle"><input type="checkbox" id="inC" onchange="CIRCUIT.update()">C</label>
+            <label class="toggle"><input type="checkbox" id="inD" onchange="CIRCUIT.update()">D</label>
+          </div>
+        </div>
+        <div class="row">
+          <button onclick="CIRCUIT.addGate('AND')">+ AND</button>
+          <button onclick="CIRCUIT.addGate('OR')">+ OR</button>
+          <button onclick="CIRCUIT.addGate('NOT')">+ NOT</button>
+          <button onclick="CIRCUIT.addGate('XOR')">+ XOR</button>
+          <button onclick="CIRCUIT.reset()">Reset</button>
+        </div>
+        <div class="legend">Collega ingressi dal menu a tendina. Valori calcolati in tempo reale.</div>
+        <div id="canvas" style="position:relative;height:420px;border:1px dashed #334155;border-radius:12px;background:#0b1220;overflow:hidden"></div>
+        <div class="row">
+          <label class="toggle">Output osservato:
+            <select id="outSelect" onchange="CIRCUIT.update()"></select>
+          </label>
+          <div id="outValue" class="mono"></div>
+        </div>
+        <div id="tt"></div>
+      </div>
+    </section>
+
+    <footer><p class="legend">© 2025 PezzaliAPP • MIT</p></footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
