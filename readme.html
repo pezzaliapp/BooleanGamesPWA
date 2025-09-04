@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>BooleanGamesPWA — README</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+      margin: 2rem auto;
+      max-width: 900px;
+      padding: 0 1rem;
+      color: #222;
+    }
+    h1, h2, h3 { color: #0055a5; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 1rem 0;
+      width: 100%;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+    }
+    a {
+      color: #0055a5;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    hr {
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+<article>
+# BooleanGamesPWA — Imparare la logica come giocare con i LEGO<br>
+<br>
+👉 **Gioca subito online:** **<https://www.alessandropezzali.it/BooleanGamesPWA/>**<br>
+<br>
+BooleanGamesPWA trasforma la logica booleana in **sei mini-giochi**.  <br>
+Pensa alla logica come ai **LEGO**: pochi pezzi semplici (1/0, vero/falso) che, incastrati, costruiscono cose potenti.  <br>
+Non servono conoscenze pregresse: **clicca, prova, osserva**. L’obiettivo è coltivare la capacità di **imparare ad imparare**.<br>
+<br>
+---<br>
+<br>
+## 🧭 Come iniziare (subito)<br>
+<br>
+- Apri il link sopra e scegli un gioco dal menu.<br>
+- Ogni gioco ha pulsanti **Nuovo / Hint / Check / Soluzione** (quando presenti) e un **feedback immediato**.<br>
+- Se qualcosa sembra “non cambiarsi”, aggiorna la pagina con **Cmd+Shift+R** (macOS) o **Ctrl+F5** (Windows).<br>
+<br>
+---<br>
+<br>
+## 🧱 Legenda completa dei simboli (i nostri “LEGO”)<br>
+<br>
+### Valori logici<br>
+<br>
+| Notazione | Significato | Metafora |<br>
+|---|---|---|<br>
+| `1`, **vero**, **true** | acceso | lampadina accesa |<br>
+| `0`, **falso**, **false** | spento | lampadina spenta |<br>
+<br>
+### Variabili<br>
+- **A, B, C, D**: interruttori che possono valere 0 o 1.<br>
+<br>
+### Operatori (con verità-table)<br>
+<br>
+> Nelle tabelle: **1**=vero, **0**=falso<br>
+<br>
+**NOT (negazione)** — `¬X`  <br>
+Inverte il valore.<br>
+<br>
+| X | ¬X |<br>
+|---|---|<br>
+| 0 | 1 |<br>
+| 1 | 0 |<br>
+<br>
+**AND (e logico)** — `X ∧ Y`  <br>
+Vero **solo** se entrambi sono veri.<br>
+<br>
+| X | Y | X ∧ Y |<br>
+|---|---|---|<br>
+| 0 | 0 | 0 |<br>
+| 0 | 1 | 0 |<br>
+| 1 | 0 | 0 |<br>
+| 1 | 1 | 1 |<br>
+<br>
+**OR (o logico)** — `X ∨ Y`  <br>
+Vero se **almeno uno** è vero.<br>
+<br>
+| X | Y | X ∨ Y |<br>
+|---|---|---|<br>
+| 0 | 0 | 0 |<br>
+| 0 | 1 | 1 |<br>
+| 1 | 0 | 1 |<br>
+| 1 | 1 | 1 |<br>
+<br>
+**XOR (o esclusivo)** — `X ⊕ Y`  <br>
+Vero se **esattamente uno** è vero.<br>
+<br>
+| X | Y | X ⊕ Y |<br>
+|---|---|---|<br>
+| 0 | 0 | 0 |<br>
+| 0 | 1 | 1 |<br>
+| 1 | 0 | 1 |<br>
+| 1 | 1 | 0 |<br>
+<br>
+**Implica** — `X → Y`  <br>
+Falso **solo** se X=1 e Y=0; altrimenti vero.<br>
+<br>
+| X | Y | X → Y |<br>
+|---|---|---|<br>
+| 0 | 0 | 1 |<br>
+| 0 | 1 | 1 |<br>
+| 1 | 0 | 0 |<br>
+| 1 | 1 | 1 |<br>
+<br>
+**Suggerimenti di lettura**<br>
+- Priorità tipica: `¬` > `∧` > `∨` > `⊕` > `→`.  <br>
+- Usa **parentesi** per evitare ambiguità, es.: `(A ∧ B) → ¬C`.<br>
+<br>
+### Mappe di Karnaugh (K-map) — etichette in **Gray code**<br>
+- **3 variabili** (A; BC in colonne): colonne ordinate **00, 01, 11, 10**  <br>
+- **4 variabili** (AB righe; CD colonne): righe **00, 01, 11, 10** e colonne **00, 01, 11, 10**  <br>
+> Il Gray code cambia **un solo bit alla volta** tra celle adiacenti: utile per “vedere” pattern.<br>
+<br>
+---<br>
+<br>
+## 🎮 I giochi (istruzioni + esempio + obiettivo didattico)<br>
+<br>
+### 1) 🧮 Verità o Falso — Valutare una formula<br>
+**Obiettivo**: decidere se una formula è vera o falsa con i valori dati.<br>
+<br>
+**Come si gioca**<br>
+1. Click **Nuovo** (appare una formula e un’assegnazione di A,B,C).  <br>
+2. Sostituisci i valori nella formula.  <br>
+3. Valuta passo passo (usa la legenda sopra).  <br>
+4. Premi **Vero** o **Falso**.  <br>
+5. **Hint** mostra la formula annotata con 0/1.<br>
+<br>
+**Esempio**<br>
+```<br>
+Formula: (A ∧ B) → ¬C<br>
+Valori:  A=1, B=0, C=1<br>
+<br>
+(1 ∧ 0) = 0<br>
+¬C = ¬1 = 0<br>
+(0 → 0) = 1 ⇒ Vero<br>
+```<br>
+<br>
+**Cosa impari**: lettura, sostituzione, valutazione — la “grammatica” della logica.<br>
+<br>
+---<br>
+<br>
+### 2) 🗺️ K-map (3 variabili) — Vedere la funzione su una mappa<br>
+**Obiettivo**: riempire la griglia 2×4 (A; BC) con 0/1 per **matchare** la funzione mostrata.<br>
+<br>
+**Come si gioca**<br>
+1. **Nuovo** → funzione casuale (es. `A ∧ C`).  <br>
+2. Clicca le celle per impostare 0/1.  <br>
+3. **Check** mostra quante celle coincidono.  <br>
+4. **Hint** corregge una cella. **Soluzione** compila tutto. **Pulisci** resetta.<br>
+<br>
+**Esempio**<br>
+- Funzione `A ∧ C` → metti **1** in tutte le celle dove **A=1** e **C=1** (secondo le etichette A/BC della griglia).  <br>
+<br>
+**Cosa impari**: trasformare una formula astratta in una **mappa visiva**.<br>
+<br>
+---<br>
+<br>
+### 3) 🧩 SAT 3-CNF — Rendere vere tutte le clausole<br>
+**Obiettivo**: trovare A,B,C che rendano **tutte** le clausole vere.<br>
+<br>
+**Come si gioca**<br>
+1. **Nuovo** → elenco di clausole tipo `(A ∨ ¬B ∨ C)`.  <br>
+2. Attiva/disattiva i checkbox **A**, **B**, **C**.  <br>
+3. Le clausole diventano **verdi** quando soddisfatte.  <br>
+4. **Hint** imposta automaticamente una variabile corretta. **Reset** azzera.<br>
+<br>
+**Esempio**<br>
+- Clausole: `(A ∨ ¬B ∨ C)`, `(¬A ∨ C ∨ B)`  <br>
+- Prova **A=1, B=0, C=1** → entrambe vere → **risolto**.<br>
+<br>
+**Cosa impari**: problem solving con **tentativi informati** (osserva il feedback).<br>
+<br>
+---<br>
+<br>
+### 4) 🗺️ K-map (4 variabili) — Stesse regole, scala maggiore<br>
+**Obiettivo**: riempire la **griglia 4×4** (AB; CD) secondo la funzione data.<br>
+<br>
+**Come si gioca**<br>
+1. **Nuovo** → funzione su A,B,C,D.  <br>
+2. Clicca le celle 0/1.  <br>
+3. Usa **Check / Hint / Soluzione / Pulisci** come guida.<br>
+<br>
+**Esempio**<br>
+- Funzione `B ∨ D` → metti **1** dove **B=1** o **D=1** (riga/colonna in Gray).<br>
+<br>
+**Cosa impari**: **generalizzazione** e riconoscimento di **pattern** più estesi.<br>
+<br>
+---<br>
+<br>
+### 5) 🧠 Quine–McCluskey — Semplificare (pensiero essenziale)<br>
+**Obiettivo**: ridurre una funzione alla **forma minima**.<br>
+<br>
+**Come si gioca**<br>
+1. **Nuovo (3 o 4 variabili)** → appaiono i **minterms**.  <br>
+2. **Mostra passaggi** → vedi gruppi, implicanti primi, essenziali, copertura minima.  <br>
+3. Leggi la **formula minimale**.<br>
+<br>
+**Esempio (2 variabili)**<br>
+- Vera nei casi 01 e 11 → espressione completa: `(¬A ∧ B) ∨ (A ∧ B)`  <br>
+- Forma minima: **`B`** (se B=1, il risultato è 1 indipendentemente da A).<br>
+<br>
+**Cosa impari**: togliere il superfluo, capire la **struttura**.<br>
+<br>
+---<br>
+<br>
+### 6) 🔌 Circuiti logici — Costruire con blocchi (AND/OR/NOT/XOR)<br>
+**Obiettivo**: comporre porte logiche, osservare l’uscita e la **tabella di verità** in tempo reale.<br>
+<br>
+**Come si gioca**<br>
+1. **+AND/OR/NOT/XOR** → crea un blocco (es. **G1**).  <br>
+2. Imposta gli ingressi del blocco (A/B/C/D o l’uscita di un altro blocco).  <br>
+3. In basso scegli **Output osservato** (es. G1).  <br>
+4. Attiva/spegni A/B/C/D → aggiornamento **live** di uscita e tabella.  <br>
+5. **Reset** pulisce tutto.<br>
+<br>
+**Esempio**<br>
+- G1 = **AND(A, B)**  <br>
+- Con A=1 e B=1 → uscita=1; se uno è 0 → uscita=0.  <br>
+- Aggiungi G2 = **XOR(G1, C)** → componi logiche più ricche.<br>
+<br>
+**Cosa impari**: dal simbolo al circuito, **pensiero compositivo**.<br>
+<br>
+---<br>
+<br>
+## 🛣️ Percorsi consigliati (per tutti i livelli)<br>
+<br>
+- **Principiante (15–20 min)** → Verità o Falso → SAT  <br>
+- **Pratico (30 min)** → K-map 3v → K-map 4v  <br>
+- **Curioso/Avanzato (45–60+ min)** → Quine–McCluskey → Circuiti<br>
+<br>
+---<br>
+<br>
+## ❓ FAQ rapide<br>
+<br>
+- **Non capisco i simboli.**  <br>
+  Guarda la **Legenda** sopra e le **tabelle di verità**: sono il tuo “foglio di comandi”.<br>
+<br>
+- **La pagina non si aggiorna.**  <br>
+  Fai **Cmd+Shift+R** (macOS) o **Ctrl+F5** (Windows). Su sito HTTPS il service worker aggiorna in automatico, ma a volte serve un hard refresh.<br>
+<br>
+- **Posso usarlo in classe?**  <br>
+  Sì. Proposta: 10′ di Verità/Falso condiviso, poi gruppi su K-map, chiusura con un circuito semplice costruito insieme.<br>
+<br>
+---<br>
+<br>
+## 📚 Glossario essenziale<br>
+<br>
+- **Variabile**: interruttore che vale 0/1.  <br>
+- **Funzione**: regola che, dati gli interruttori, produce 0/1.  <br>
+- **Minterm**: combinazione specifica di variabili per cui la funzione vale 1.  <br>
+- **K-map**: mappa che mostra dove la funzione vale 1 (etichette in Gray).  <br>
+- **Implicante primo / essenziale**: “blocchi” indispensabili nella forma minima.  <br>
+- **Forma minima**: modo più corto e chiaro di scrivere la stessa funzione.<br>
+<br>
+---<br>
+<br>
+## 🧾 Licenza<br>
+<br>
+Software rilasciato con licenza **MIT**.  <br>
+Se insegni, traduci, migliori: **condividi**. La cultura cresce se si costruisce insieme, **un mattoncino alla volta**.<br>
+
+</article>
+</body>
+</html>
