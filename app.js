@@ -59,7 +59,6 @@
   const K_COLS = [[0,0],[0,1],[1,1],[1,0]];
   function idxToABC(idx){ const row=Math.floor(idx/4), col=idx%4; const [b,c]=K_COLS[col]; const a=row; return {A:!!a, B:!!b, C:!!c}; }
   function idxToABCD(idx){ const row=Math.floor(idx/4), col=idx%4; const [a,b]=K_COLS[row], [c,d]=K_COLS[col]; return {A:!!a, B:!!b, C:!!c, D:!!d}; }
-  // Helpers per spiegazioni K-map
   function envToStrABC(env){ return `A=${env.A?1:0}, B=${env.B?1:0}, C=${env.C?1:0}`; }
   function envToStrABCD(env){ return `A=${env.A?1:0}, B=${env.B?1:0}, C=${env.C?1:0}, D=${env.D?1:0}`; }
 
@@ -79,15 +78,14 @@
       const ok = (val===this.ans);
       const fb=$('#vfFeedback');
       if(fb) fb.innerHTML = ok? '<span class="ok">Corretto! +1</span>' : '<span class="bad">Sbagliato</span>';
-      // Spiegazione dettagliata
       const hh=$('#vfHint');
       if(hh){
-        const ann = astAnnotated(this.ast, this.env); // es. (T ∧ F) → ¬T
+        const ann = astAnnotated(this.ast, this.env);
         const final = this.ans ? 'Vero' : 'Falso';
         hh.textContent = `Spiegazione: ${ann} ⇒ ${final}`;
       }
       if (ok) score.add(1);
-      // NON auto-advance: si va avanti con "Nuovo"
+      // niente auto-advance
     },
     hint(){ if(!this.ast) return; const hh=$('#vfHint'); if(hh) hh.textContent = 'Suggerimento: '+astAnnotated(this.ast, this.env); }
   };
@@ -109,7 +107,7 @@
     newPuzzle(){
       this.ast = randomAST(['A','B','C']); this.updateExpr();
       for(let i=0;i<8;i++){ const env=idxToABC(i); this.target[i]=evalAST(this.ast, env)?1:0; this.player[i]=0; }
-      $$('#kmapGrid .kcell').forEach(d=>{d.textContent='0'; d.classList.remove('active');});
+      $$('#kmapGrid .kcell').forEach(d=>{ d.textContent='0'; d.classList.remove('active');});
       const m=$('#kmapMsg'); if(m) m.textContent='Compila la mappa per coincidere con la funzione.';
     },
     hint(){
@@ -122,15 +120,11 @@
         if(this.player[i]===this.target[i]) right++; else wrongIdx.push(i);
       }
       const m=$('#kmapMsg');
-
-      // Spiegazione: dove la funzione vale 1 (mintermini)
       const ones=[];
       for(let i=0;i<8;i++){ if(this.target[i]===1){ const env=idxToABC(i); ones.push(envToStrABC(env)); } }
-
       if(right===8){
         if(m) m.innerHTML='<span class="ok">Perfetto! +3</span> — La funzione vale 1 per: ' + (ones.join(' • ')||'—');
         score.add(3);
-        // niente auto-new
       } else {
         if(m) m.innerHTML = `${right}/8 corrette. Celle sbagliate: [${wrongIdx.join(', ')}].<br>` +
           `Suggerimento: imposta 1 quando ${ones.length?('(' + ones.join(' • ') + ')'): 'non ci sono mintermini a 1'}.`;
@@ -175,7 +169,6 @@
           const ok=evalClause(cl,env);
           const div=document.createElement('div');
           div.className='clause mono'+(ok?' ok':'');
-          // Annotazione esplicita con i valori assunti
           const exp = cl.map(lit=>{
             const v=['A','B','C'][Math.abs(lit)-1];
             const val = env[v]?1:0;
@@ -191,7 +184,6 @@
       if(allOk){
         if(s) s.innerHTML = `<span class="ok">Risolto! +2</span> — Assegnazione valida: A=${+this.env.A}, B=${+this.env.B}, C=${+this.env.C}`;
         score.add(2);
-        // niente auto-new
       } else {
         const falseIdx = this.clauses
           .map((cl,i)=>({i,ok:evalClause(cl,this.env)}))
@@ -232,14 +224,11 @@
         if(this.player[i]===this.target[i]) right++; else wrongIdx.push(i);
       }
       const m=$('#kmap4Msg');
-
       const ones=[];
       for(let i=0;i<16;i++){ if(this.target[i]===1){ const env=idxToABCD(i); ones.push(envToStrABCD(env)); } }
-
       if(right===16){
         if(m) m.innerHTML = `<span class="ok">Perfetto! +5</span> — La funzione vale 1 per: ${ones.join(' • ')||'—'}`;
         score.add(5);
-        // niente auto-new
       } else {
         if(m) m.innerHTML = `${right}/16 corrette. Celle sbagliate: [${wrongIdx.join(', ')}].<br>` +
           `Suggerimento: imposta 1 quando ${ones.length?('(' + ones.join(' • ') + ')'):'non ci sono mintermini a 1'}.`;
@@ -338,7 +327,7 @@
       const id='G'+(this.counter++);
       const x=20+Math.random()*260, y=20+Math.random()*280;
       const node={id,type,a:null,b:null,x,y,value:false};
-      this.nodes.push(node;
+      this.nodes.push(node); // <-- FIX
       const div=document.createElement('div');
       div.className='node'; div.style.left=x+'px'; div.style.top=y+'px'; div.dataset.id=id;
       div.innerHTML=`<div class="head"><span>${type}</span><span class="badge">${id}</span></div>
