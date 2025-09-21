@@ -59,6 +59,9 @@
   const K_COLS = [[0,0],[0,1],[1,1],[1,0]];
   function idxToABC(idx){ const row=Math.floor(idx/4), col=idx%4; const [b,c]=K_COLS[col]; const a=row; return {A:!!a, B:!!b, C:!!c}; }
   function idxToABCD(idx){ const row=Math.floor(idx/4), col=idx%4; const [a,b]=K_COLS[row], [c,d]=K_COLS[col]; return {A:!!a, B:!!b, C:!!c, D:!!d}; }
+  // Helpers per spiegazioni K-map
+  function envToStrABC(env){ return `A=${env.A?1:0}, B=${env.B?1:0}, C=${env.C?1:0}`; }
+  function envToStrABCD(env){ return `A=${env.A?1:0}, B=${env.B?1:0}, C=${env.C?1:0}, D=${env.D?1:0}`; }
 
   // 1) Verità o Falso
   const VF = {
@@ -74,9 +77,17 @@
     },
     answer(val){
       const ok = (val===this.ans);
-      const fb=$('#vfFeedback'); if(fb) fb.innerHTML = ok? '<span class="ok">Corretto! +1</span>' : '<span class="bad">Sbagliato</span>';
+      const fb=$('#vfFeedback');
+      if(fb) fb.innerHTML = ok? '<span class="ok">Corretto! +1</span>' : '<span class="bad">Sbagliato</span>';
+      // Spiegazione dettagliata
+      const hh=$('#vfHint');
+      if(hh){
+        const ann = astAnnotated(this.ast, this.env); // es. (T ∧ F) → ¬T
+        const final = this.ans ? 'Vero' : 'Falso';
+        hh.textContent = `Spiegazione: ${ann} ⇒ ${final}`;
+      }
       if (ok) score.add(1);
-      this.newRound();
+      // NON auto-advance: si va avanti con "Nuovo"
     },
     hint(){ if(!this.ast) return; const hh=$('#vfHint'); if(hh) hh.textContent = 'Suggerimento: '+astAnnotated(this.ast, this.env); }
   };
@@ -106,10 +117,24 @@
       const m=$('#kmapMsg'); if(m) m.textContent='Nessun hint disponibile.';
     },
     check(){
-      let right=0; for(let i=0;i<8;i++) if(this.player[i]===this.target[i]) right++;
+      let right=0; const wrongIdx=[];
+      for(let i=0;i<8;i++){
+        if(this.player[i]===this.target[i]) right++; else wrongIdx.push(i);
+      }
       const m=$('#kmapMsg');
-      if(right===8){ if(m) m.innerHTML='<span class="ok">Perfetto! +3</span>'; score.add(3); this.newPuzzle(); }
-      else if(m) m.textContent = `${right}/8 corrette. Continua!`;
+
+      // Spiegazione: dove la funzione vale 1 (mintermini)
+      const ones=[];
+      for(let i=0;i<8;i++){ if(this.target[i]===1){ const env=idxToABC(i); ones.push(envToStrABC(env)); } }
+
+      if(right===8){
+        if(m) m.innerHTML='<span class="ok">Perfetto! +3</span> — La funzione vale 1 per: ' + (ones.join(' • ')||'—');
+        score.add(3);
+        // niente auto-new
+      } else {
+        if(m) m.innerHTML = `${right}/8 corrette. Celle sbagliate: [${wrongIdx.join(', ')}].<br>` +
+          `Suggerimento: imposta 1 quando ${ones.length?('(' + ones.join(' • ') + ')'): 'non ci sono mintermini a 1'}.`;
+      }
     },
     solve(){ for(let i=0;i<8;i++) this.player[i]=this.target[i]; $$('#kmapGrid .kcell').forEach((d,i)=>{ d.textContent=this.player[i]?'1':'0'; d.classList.toggle('active', !!this.player[i]); }); const m=$('#kmapMsg'); if(m) m.textContent='Soluzione mostrata.'; },
     clear(){ this.player.fill(0); $$('#kmapGrid .kcell').forEach(d=>{ d.textContent='0'; d.classList.remove('active'); }); const m=$('#kmapMsg'); if(m) m.textContent='Mappa pulita.'; }
@@ -141,11 +166,38 @@
     render(){
       const a=$('#satA'), b=$('#satB'), c=$('#satC');
       if(a) a.checked=this.env.A; if(b) b.checked=this.env.B; if(c) c.checked=this.env.C;
-      const box=$('#satClauses'); if(box) { box.innerHTML=''; const env=this.env; this.clauses.forEach(cl=>{ const ok=evalClause(cl,env); const div=document.createElement('div'); div.className='clause mono'+(ok?' ok':''); div.textContent=clauseToString(cl); box.appendChild(div); }); }
+
+      const box=$('#satClauses');
+      if(box) {
+        box.innerHTML='';
+        const env=this.env;
+        this.clauses.forEach(cl=>{
+          const ok=evalClause(cl,env);
+          const div=document.createElement('div');
+          div.className='clause mono'+(ok?' ok':'');
+          // Annotazione esplicita con i valori assunti
+          const exp = cl.map(lit=>{
+            const v=['A','B','C'][Math.abs(lit)-1];
+            const val = env[v]?1:0;
+            return lit>0 ? `${v}=${val}` : `¬${v}=${val?0:1}`;
+          }).join(' ∨ ');
+          div.textContent='('+exp+')';
+          box.appendChild(div);
+        });
+      }
+
       const allOk=this.clauses.every(cl=>evalClause(cl,this.env));
       const s=$('#satMsg');
-      if(allOk){ if(s) s.innerHTML='<span class="ok">Risolto! +2</span>'; score.add(2); setTimeout(()=>this.newPuzzle(),600); }
-      else if(s) s.textContent='';
+      if(allOk){
+        if(s) s.innerHTML = `<span class="ok">Risolto! +2</span> — Assegnazione valida: A=${+this.env.A}, B=${+this.env.B}, C=${+this.env.C}`;
+        score.add(2);
+        // niente auto-new
+      } else {
+        const falseIdx = this.clauses
+          .map((cl,i)=>({i,ok:evalClause(cl,this.env)}))
+          .filter(x=>!x.ok).map(x=>x.i+1);
+        if(s) s.textContent = `Clausole ancora false: ${falseIdx.join(', ')}`;
+      }
     },
     update(){ const a=$('#satA'), b=$('#satB'), c=$('#satC'); this.env.A=!!(a&&a.checked); this.env.B=!!(b&&b.checked); this.env.C=!!(c&&c.checked); this.render(); },
     hint(){ for(const v of ['A','B','C']){ if(this.env[v]!==this.solution[v]){ this.env[v]=this.solution[v]; this.render(); const s=$('#satMsg'); if(s) s.textContent=`Hint: imposta ${v} = ${this.solution[v]?1:0}`; return; } } const s=$('#satMsg'); if(s) s.textContent='Nessun hint disponibile.'; },
@@ -175,10 +227,23 @@
       const m=$('#kmap4Msg'); if(m) m.textContent='Nessun hint disponibile.';
     },
     check(){
-      let right=0; for(let i=0;i<16;i++) if(this.player[i]===this.target[i]) right++;
+      let right=0; const wrongIdx=[];
+      for(let i=0;i<16;i++){
+        if(this.player[i]===this.target[i]) right++; else wrongIdx.push(i);
+      }
       const m=$('#kmap4Msg');
-      if(right===16){ if(m) m.innerHTML='<span class="ok">Perfetto! +5</span>'; score.add(5); this.newPuzzle(); }
-      else if(m) m.textContent = `${right}/16 corrette. Continua!`;
+
+      const ones=[];
+      for(let i=0;i<16;i++){ if(this.target[i]===1){ const env=idxToABCD(i); ones.push(envToStrABCD(env)); } }
+
+      if(right===16){
+        if(m) m.innerHTML = `<span class="ok">Perfetto! +5</span> — La funzione vale 1 per: ${ones.join(' • ')||'—'}`;
+        score.add(5);
+        // niente auto-new
+      } else {
+        if(m) m.innerHTML = `${right}/16 corrette. Celle sbagliate: [${wrongIdx.join(', ')}].<br>` +
+          `Suggerimento: imposta 1 quando ${ones.length?('(' + ones.join(' • ') + ')'):'non ci sono mintermini a 1'}.`;
+      }
     },
     solve(){ for(let i=0;i<16;i++) this.player[i]=this.target[i]; $$('#kmap4Grid .kcell').forEach((d,i)=>{ d.textContent=this.player[i]?'1':'0'; d.classList.toggle('active', !!this.player[i]); }); const m=$('#kmap4Msg'); if(m) m.textContent='Soluzione mostrata.'; },
     clear(){ this.player.fill(0); $$('#kmap4Grid .kcell').forEach(d=>{ d.textContent='0'; d.classList.remove('active'); }); const m=$('#kmap4Msg'); if(m) m.textContent='Mappa pulita.'; }
@@ -273,7 +338,7 @@
       const id='G'+(this.counter++);
       const x=20+Math.random()*260, y=20+Math.random()*280;
       const node={id,type,a:null,b:null,x,y,value:false};
-      this.nodes.push(node);
+      this.nodes.push(node;
       const div=document.createElement('div');
       div.className='node'; div.style.left=x+'px'; div.style.top=y+'px'; div.dataset.id=id;
       div.innerHTML=`<div class="head"><span>${type}</span><span class="badge">${id}</span></div>
@@ -317,6 +382,7 @@
       const rows=[];
       for(let m=0;m<16;m++){ const a=!!((m>>3)&1), b=!!((m>>2)&1), c=!!((m>>1)&1), d=!!(m&1); const env={A:a,B:b,C:c,D:d}; const old=this.env; this.env=env; const v=this.resolveSignal(target,new Set()); rows.push(`${a?1:0} ${b?1:0} ${c?1:0} ${d?1:0} | ${v?1:0}`); this.env=old; }
       tt.innerHTML = `<pre class="mono">A B C D | Y\n${rows.join('\n')}</pre>`;
+      const exp=$('#circuitMsg'); if(exp) exp.textContent = `Output ${target} = ${out?1:0} con A=${+this.env.A}, B=${+this.env.B}, C=${+this.env.C}, D=${+this.env.D}`;
     }
   };
   window.CIRCUIT = CIRCUIT; CIRCUIT.reset(); setTimeout(()=>{ const s=$('#outSelect'); if(s) s.value='A'; CIRCUIT.update(); }, 0);
