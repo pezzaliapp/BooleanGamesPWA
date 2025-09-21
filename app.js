@@ -85,7 +85,6 @@
         hh.textContent = `Spiegazione: ${ann} ⇒ ${final}`;
       }
       if (ok) score.add(1);
-      // niente auto-advance
     },
     hint(){ if(!this.ast) return; const hh=$('#vfHint'); if(hh) hh.textContent = 'Suggerimento: '+astAnnotated(this.ast, this.env); }
   };
@@ -135,15 +134,15 @@
   };
   window.KMAP = KMAP; KMAP.buildGrid(); KMAP.newPuzzle();
 
-  // 3) SAT 3-CNF
+  // 3) SAT 3-CNF (fix: partita inizia con almeno una clausola falsa)
   function literalToString(lit){ const v=['A','B','C'][Math.abs(lit)-1]; return lit>0? v : '¬'+v; }
   function clauseToString(cl){ return '('+cl.map(literalToString).join(' ∨ ')+')'; }
   function evalClause(cl, env){ return cl.some(lit=>{ const v=['A','B','C'][Math.abs(lit)-1]; const val=env[v]; return lit>0 ? !!val : !val; }); }
   const SAT = {
     clauses:[], solution:{A:false,B:false,C:false}, env:{A:false,B:false,C:false},
     newPuzzle(){
+      // soluzione soddisfacente "nascosta"
       this.solution = {A:!!rnd(2), B:!!rnd(2), C:!!rnd(2)};
-      this.env = {A:false,B:false,C:false};
       this.clauses = [];
       const lits=[1,2,3];
       for(let i=0;i<4;i++){
@@ -155,41 +154,25 @@
         clause.sort(()=>Math.random()-0.5);
         this.clauses.push(clause);
       }
-      this.render(); const s=$('#satMsg'); if(s) s.textContent='Imposta A,B,C per rendere tutte le clausole vere.';
+      // imposta una configurazione iniziale NON risolutiva (almeno una clausola falsa)
+      this.env = {A:!!rnd(2), B:!!rnd(2), C:!!rnd(2)};
+      let tries = 0;
+      while (this.clauses.every(cl=>evalClause(cl,this.env)) && tries<5){
+        const varNames=['A','B','C']; const v=choice(varNames);
+        this.env[v] = !this.env[v]; // flip casuale per creare almeno un rosso
+        tries++;
+      }
+      this.render();
+      const s=$('#satMsg'); if(s) s.textContent='Imposta A,B,C per rendere tutte le clausole vere.';
     },
     render(){
       const a=$('#satA'), b=$('#satB'), c=$('#satC');
       if(a) a.checked=this.env.A; if(b) b.checked=this.env.B; if(c) c.checked=this.env.C;
-
-      const box=$('#satClauses');
-      if(box) {
-        box.innerHTML='';
-        const env=this.env;
-        this.clauses.forEach(cl=>{
-          const ok=evalClause(cl,env);
-          const div=document.createElement('div');
-          div.className='clause mono'+(ok?' ok':'');
-          const exp = cl.map(lit=>{
-            const v=['A','B','C'][Math.abs(lit)-1];
-            const val = env[v]?1:0;
-            return lit>0 ? `${v}=${val}` : `¬${v}=${val?0:1}`;
-          }).join(' ∨ ');
-          div.textContent='('+exp+')';
-          box.appendChild(div);
-        });
-      }
-
+      const box=$('#satClauses'); if(box) { box.innerHTML=''; const env=this.env; this.clauses.forEach(cl=>{ const ok=evalClause(cl,env); const div=document.createElement('div'); div.className='clause mono'+(ok?' ok':''); const exp = cl.map(lit=>{ const v=['A','B','C'][Math.abs(lit)-1]; const val = env[v]?1:0; return lit>0 ? `${v}=${val}` : `¬${v}=${val?0:1}`; }).join(' ∨ '); div.textContent='('+exp+')'; box.appendChild(div); }); }
       const allOk=this.clauses.every(cl=>evalClause(cl,this.env));
       const s=$('#satMsg');
-      if(allOk){
-        if(s) s.innerHTML = `<span class="ok">Risolto! +2</span> — Assegnazione valida: A=${+this.env.A}, B=${+this.env.B}, C=${+this.env.C}`;
-        score.add(2);
-      } else {
-        const falseIdx = this.clauses
-          .map((cl,i)=>({i,ok:evalClause(cl,this.env)}))
-          .filter(x=>!x.ok).map(x=>x.i+1);
-        if(s) s.textContent = `Clausole ancora false: ${falseIdx.join(', ')}`;
-      }
+      if(allOk){ if(s) s.innerHTML = `<span class="ok">Risolto! +2</span> — Assegnazione valida: A=${+this.env.A}, B=${+this.env.B}, C=${+this.env.C}`; score.add(2); }
+      else if(s){ const falseIdx = this.clauses.map((cl,i)=>({i,ok:evalClause(cl,this.env)})).filter(x=>!x.ok).map(x=>x.i+1); s.textContent = `Clausole ancora false: ${falseIdx.join(', ')}`; }
     },
     update(){ const a=$('#satA'), b=$('#satB'), c=$('#satC'); this.env.A=!!(a&&a.checked); this.env.B=!!(b&&b.checked); this.env.C=!!(c&&c.checked); this.render(); },
     hint(){ for(const v of ['A','B','C']){ if(this.env[v]!==this.solution[v]){ this.env[v]=this.solution[v]; this.render(); const s=$('#satMsg'); if(s) s.textContent=`Hint: imposta ${v} = ${this.solution[v]?1:0}`; return; } } const s=$('#satMsg'); if(s) s.textContent='Nessun hint disponibile.'; },
@@ -215,7 +198,7 @@
       const m=$('#kmap4Msg'); if(m) m.textContent='Compila la mappa per coincidere con la funzione.';
     },
     hint(){
-      for(let i=0;i<16;i++) if(this.player[i]!==this.target[i]){ this.player[i]=this.target[i]; const d=$$('#kmap4Grid .kcell')[i]; d.textContent=this.player[i]?'1':'0'; d.classList.toggle('active', !!this.player[i]); const m=$('#kmap4Msg'); if(m) m.textContent=`Hint: cella ${i} corretta.`; return; }
+      for(let i=0;i<16;i++) if(this.player[i]!==this.target[i]){ this.player[i]=this.target[i]; const d=$$('#kmap4Grid .kcell')[i]; d.textContent=this.player[i]?'1':'0'; d.classList.toggle('active', !!this.player[i]); const m=$('#kmap4Msg'); if(m) m.textContent=`Hint: cella ${i} correta.`; return; }
       const m=$('#kmap4Msg'); if(m) m.textContent='Nessun hint disponibile.';
     },
     check(){
@@ -327,7 +310,7 @@
       const id='G'+(this.counter++);
       const x=20+Math.random()*260, y=20+Math.random()*280;
       const node={id,type,a:null,b:null,x,y,value:false};
-      this.nodes.push(node); // <-- FIX
+      this.nodes.push(node);
       const div=document.createElement('div');
       div.className='node'; div.style.left=x+'px'; div.style.top=y+'px'; div.dataset.id=id;
       div.innerHTML=`<div class="head"><span>${type}</span><span class="badge">${id}</span></div>
