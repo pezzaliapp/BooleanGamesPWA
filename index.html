@@ -48,7 +48,18 @@
     .node .body{display:flex;gap:6px;align-items:center}
     .node select{background:#0b1220;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:4px}
     .badge{font-size:11px;color:#94a3b8}
-  </style>
+  
+    /* Guide blocks */
+    details.guide{border:1px solid #334155;background:#0b1220;padding:12px;border-radius:12px}
+    details.guide+details.guide{margin-top:10px}
+    details.guide summary{cursor:pointer;font-weight:700;list-style:none}
+    details.guide summary::marker{content:''}
+    details.guide .muted{color:var(--muted)}
+    details.guide code, details.guide .mono{
+      font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace
+    }
+
+</style>
   <script>
     function show(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
     window.addEventListener('DOMContentLoaded',()=>{
@@ -106,6 +117,20 @@
         <div id="vfHint" class="legend"></div>
         <div class="row"><button onclick="VF.answer(true)">Vero</button><button onclick="VF.answer(false)">Falso</button></div>
         <div id="vfFeedback"></div>
+
+<details class="guide">
+  <summary>📘 Spiegazione (come si risolve)</summary>
+  <p><strong>Obiettivo:</strong> decidere se l'espressione booleana è <em>vera</em> o <em>falsa</em> per i valori indicati di <code>A</code>, <code>B</code>, <code>C</code>.</p>
+  <ol>
+    <li>Sostituisci ai simboli le cifre: 1 = Vero, 0 = Falso.</li>
+    <li>Calcola dentro le parentesi e procedi verso l'esterno.</li>
+    <li>Regole: <span class="mono">AND (∧)</span> è 1 solo se entrambi 1; <span class="mono">OR (∨)</span> è 1 se almeno uno è 1; <span class="mono">NOT (¬)</span> inverte; <span class="mono">XOR (⊕)</span> è 1 se sono diversi; <span class="mono">→</span> è falsa solo se sinistra=1 e destra=0.</li>
+  </ol>
+  <p><strong>Esempio svolto.</strong> Espr.: <code>(A ∧ B) → ¬C</code>, valori: <code>A=1, B=0, C=1</code> →
+    <span class="mono">(1 ∧ 0)=0</span>, <span class="mono">¬1=0</span>, quindi <span class="mono">(0 → 0)=1</span> → <strong>Vero</strong>.</p>
+  <p class="muted">Tip: <em>Hint</em> mostra la formula annotata con <span class="mono">T/F</span> passo passo.</p>
+</details>
+
       </div>
     </section>
 
@@ -118,6 +143,24 @@
         <div class="spacer"></div>
         <div class="mono">Funzione: <span id="kmapExpr"></span></div>
         <div id="kmapMsg"></div>
+
+<details class="guide">
+  <summary>📘 Spiegazione</summary>
+  <p><strong>Cos'è:</strong> mappa di Karnaugh 2×4 per <code>A</code>, <code>B</code>, <code>C</code>. Ogni cella è una combinazione di valori.</p>
+  <ul>
+    <li>Righe = <code>A</code> (0 in alto, 1 in basso).</li>
+    <li>Colonne = <code>BC</code> in <em>ordine Gray</em>: 00, 01, 11, 10 (tra colonne adiacenti cambia un solo bit).</li>
+  </ul>
+  <p><strong>Come risolvere:</strong></p>
+  <ol>
+    <li>Leggi la <em>Funzione</em> (es. <span class="mono">A ∧ C</span>).</li>
+    <li>Per ogni cella chiediti: con quei <code>A,B,C</code> la funzione vale 1? Se sì, clicca e metti 1; altrimenti 0.</li>
+    <li>Usa <em>Check</em> per verificare; <em>Hint</em> corregge una cella; <em>Soluzione</em> compila tutto.</li>
+  </ol>
+  <p><strong>Esempio.</strong> Funzione: <span class="mono">A ∧ C</span>. Metti 1 nelle celle dove <span class="mono">A=1</span> e <span class="mono">C=1</span> (B non conta).</p>
+  <p class="muted">L'ordine Gray è utile per i raggruppamenti quando si semplifica.</p>
+</details>
+
       </div>
     </section>
 
@@ -131,6 +174,19 @@
         </div>
         <div class="clauses" id="satClauses"></div>
         <div id="satMsg"></div>
+
+<details class="guide">
+  <summary>📘 Spiegazione</summary>
+  <p><strong>Che cos'è:</strong> un'istanza di <em>3-CNF SAT</em>. Ogni clausola è del tipo <span class="mono">(X ∨ Y ∨ Z)</span> ed è vera se <em>almeno una</em> delle tre parti è vera.</p>
+  <p><strong>Obiettivo:</strong> impostare <code>A</code>, <code>B</code>, <code>C</code> in modo che <em>tutte</em> le clausole diventino verdi.</p>
+  <ol>
+    <li>Scegli una clausola rossa, es. <span class="mono">(A ∨ ¬B ∨ C)</span>.</li>
+    <li>Valuta i tre pezzi con i valori attuali (se <span class="mono">B=1</span>, allora <span class="mono">¬B=0</span>).</li>
+    <li>Se tutti e tre valgono 0, cambia una variabile che la rende 1 (qui: <span class="mono">A=1</span> oppure <span class="mono">C=1</span> o <span class="mono">B=0</span>).</li>
+  </ol>
+  <p><strong>Esempio.</strong> Clausole: <span class="mono">(A ∨ ¬B ∨ C)</span>, <span class="mono">(¬A ∨ B ∨ C)</span>. Con <span class="mono">A=1, B=0, C=1</span> entrambe sono vere.</p>
+</details>
+
       </div>
     </section>
 
@@ -143,6 +199,22 @@
         <div class="spacer"></div>
         <div class="mono">Funzione: <span id="kmap4Expr"></span></div>
         <div id="kmap4Msg"></div>
+
+<details class="guide">
+  <summary>📘 Spiegazione</summary>
+  <p><strong>Cos'è:</strong> mappa di Karnaugh 4×4 per <code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>.</p>
+  <ul>
+    <li>Righe = <code>AB</code> in Gray: 00, 01, 11, 10.</li>
+    <li>Colonne = <code>CD</code> in Gray: 00, 01, 11, 10.</li>
+  </ul>
+  <ol>
+    <li>Leggi la <em>Funzione</em> (es. <span class="mono">B ∨ D</span>).</li>
+    <li>Metti 1 nelle celle dove la funzione è vera (qui: quando <span class="mono">B=1</span> o <span class="mono">D=1</span>).</li>
+    <li><em>Check</em> verifica; <em>Hint</em> corregge una cella.</li>
+  </ol>
+  <p class="muted">Le adiacenze (anche ai bordi) servono per trovare gruppi di 1 (2,4,8,...) e semplificare.</p>
+</details>
+
       </div>
     </section>
 
@@ -160,6 +232,21 @@
         <details id="qmStepsBox"><summary>Passaggi</summary>
           <pre id="qmSteps" class="mono" style="white-space:pre-wrap"></pre>
         </details>
+
+<details class="guide">
+  <summary>📘 Spiegazione</summary>
+  <p><strong>Obiettivo:</strong> ottenere la <em>forma minima</em> di una funzione partendo dai <em>minterms</em> (le combinazioni che valgono 1).</p>
+  <ol>
+    <li><strong>Binario:</strong> scrivi ogni minterm in binario con N bit.</li>
+    <li><strong>Raggruppa</strong> per numero di 1 (0,1,2,...).</li>
+    <li><strong>Combina</strong> coppie che differiscono per un solo bit → sostituisci quel bit con “-”.</li>
+    <li>Quelli non più combinabili sono <em>implicanti primi</em>.</li>
+    <li>Costruisci la tabella coperture e scegli gli <em>implicanti essenziali</em>.</li>
+    <li>Copri i restanti minterms con il minor numero di implicanti.</li>
+    <li><strong>Traduci</strong> le maschere in termini: 1 = variabile, 0 = negazione, - = assente. Es.: <span class="mono">01-1</span> → <span class="mono">¬A ∧ B ∧ D</span>.</li>
+  </ol>
+  <p><strong>Mini-esempio (3 variabili):</strong> minterms {1,3,5,7} → implicanti <span class="mono">-1-</span> e <span class="mono">--1</span> → forma minima <span class="mono">B ∨ C</span>.</p>
+</details>
       </div>
     </section>
 
@@ -188,7 +275,22 @@
           </label>
           <div id="outValue" class="mono"></div>
         </div>
+        <div id="circuitMsg" class="legend"></div>
         <div id="tt"></div>
+
+<details class="guide">
+  <summary>📘 Spiegazione</summary>
+  <p><strong>Costruisci un circuito</strong> aggiungendo porte <span class="mono">AND</span>, <span class="mono">OR</span>, <span class="mono">NOT</span>, <span class="mono">XOR</span> e collegando gli ingressi dal menu a tendina. Puoi usare come ingressi anche l’uscita di altre porte.</p>
+  <ul>
+    <li><strong>AND</strong>: 1 solo se <em>tutti</em> gli ingressi sono 1.</li>
+    <li><strong>OR</strong>: 1 se <em>almeno uno</em> è 1.</li>
+    <li><strong>NOT</strong>: inverte (0→1, 1→0).</li>
+    <li><strong>XOR</strong>: 1 se gli ingressi sono <em>diversi</em>.</li>
+  </ul>
+  <p>Seleziona l’<em>Output osservato</em> in basso per vedere il valore corrente e la <em>tabella della verità</em> completa.</p>
+  <p><strong>Esempio rapido.</strong> Crea <span class="mono">G1 = AND(A,B)</span> e poi <span class="mono">G2 = XOR(G1,C)</span>. L’uscita è 1 quando esattamente uno tra <span class="mono">G1</span> e <span class="mono">C</span> è 1; e <span class="mono">G1</span> è 1 solo se <span class="mono">A=1</span> e <span class="mono">B=1</span>.</p>
+</details>
+
       </div>
     </section>
 
