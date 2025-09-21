@@ -4,51 +4,43 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Boolean Games — PezzaliAPP</title>
-  <meta name="description" content="Sei mini-giochi di logica booleana: Verità o Falso, Karnaugh 3/4v, SAT, Quine–McCluskey, Circuiti logici." />
+  <meta name="description" content="Sei mini-giochi di logica booleana: Verità/Falso, Karnaugh 3/4v, SAT, Quine–McCluskey, Circuiti logici." />
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <meta name="theme-color" content="#0f172a">
   <style>
     :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --accent:#22c55e; --danger:#ef4444; --card:#111827; --btn:#1f2937; }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
-    header{position:sticky;top:0;z-index:10;background:linear-gradient(0deg,rgba(15,23,42,.9),rgba(15,23,42,1));backdrop-filter:blur(6px);border-bottom:1px solid #1f2937}
+    html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg);font:16px/1.5 ui-sans-serif,system-ui,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
+    a{color:inherit;text-decoration:none}
+    header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.8));backdrop-filter:blur(6px);border-bottom:1px solid #1f2937}
     .wrap{max-width:980px;margin:0 auto;padding:16px}
     .title{display:flex;align-items:center;gap:12px}
     .title h1{font-size:20px;margin:0}
     nav{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-    button,.btn{background:var(--btn);color:var(--fg);border:1px solid #374151;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
-    button:hover{filter:brightness(1.1)}
-    .pill{display:inline-block;padding:6px 10px;border-radius:9999px;border:1px solid #334155;background:#0b1220;color:var(--muted);font-size:12px}
-    main .section{display:none}
-    main .section.active{display:block}
-    .card{background:var(--card);border:1px solid #1f2937;padding:16px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
-    .grid{display:grid;gap:12px}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .big{font-size:clamp(18px,3vw,28px)}
+    .btn{display:inline-flex;gap:8px;align-items:center;background:var(--btn);color:var(--fg);border:1px solid #334155;border-radius:9999px;padding:8px 12px;cursor:pointer}
+    .btn:focus{outline:2px solid #38bdf8}
+    .section{display:none;margin-top:18px}
+    .section.active{display:block}
+    .card{border:1px solid #334155;background:#0b1220;border-radius:12px;padding:16px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
     .mono{font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
     .ok{color:var(--accent)} .bad{color:var(--danger)}
+    .legend{color:var(--muted);font-size:13px}
+    .spacer{height:8px}
+    /* kmap */
     .kmap{display:grid;grid-template-columns:80px repeat(4,64px);grid-auto-rows:64px;border:1px solid #334155;border-radius:12px;overflow:hidden}
+    .kmap4{grid-template-columns:80px repeat(4,56px);grid-auto-rows:56px}
     .kcell,.khead{display:flex;align-items:center;justify-content:center;border:1px solid #334155}
     .khead{background:#0b1220;color:var(--muted);font-weight:700}
     .kcell{cursor:pointer;font-size:20px}
     .kcell.active{background:#0a1f14;outline:2px solid #14532d}
-    .legend{color:var(--muted);font-size:13px}
-    .spacer{height:8px}
-    .kmap4{grid-template-columns:80px repeat(4,56px);grid-auto-rows:56px}
     .clauses{display:flex;flex-wrap:wrap;gap:8px}
     .clause{border:1px solid #334155;background:#0b1220;border-radius:9999px;padding:8px 12px;display:flex;align-items:center;gap:8px}
     .clause.ok{border-color:#14532d;background:#0a1f14;color:#86efac}
     .toggles{display:flex;gap:8px}
-    .toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid #334155;background:#0b1220;padding:8px 12px;border-radius:12px;cursor:pointer}
-    .toggle input{transform:scale(1.2)}
-    .node{position:absolute;min-width:140px;background:#111827;border:1px solid #334155;border-radius:12px;padding:8px;cursor:grab;box-shadow:0 6px 20px rgba(0,0,0,.25)}
-    .node:active{cursor:grabbing}
-    .node .head{font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-    .node .body{display:flex;gap:6px;align-items:center}
-    .node select{background:#0b1220;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:4px}
-    .badge{font-size:11px;color:#94a3b8}
-  
+    .toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid #334155;background:#0b1220;padding:8px 12px;border-radius:10px}
+    .toggle input{accent-color:#22c55e}
     /* Guide blocks */
     details.guide{border:1px solid #334155;background:#0b1220;padding:12px;border-radius:12px}
     details.guide+details.guide{margin-top:10px}
@@ -58,245 +50,305 @@
     details.guide code, details.guide .mono{
       font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace
     }
-
-</style>
-  <script>
-    function show(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-    window.addEventListener('DOMContentLoaded',()=>{
-      show('home');
-      try{
-        if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
-          navigator.serviceWorker.register('sw.js').catch(()=>{});
-        }
-      }catch(e){}
-    });
-  </script>
+  </style>
 </head>
 <body>
   <header>
     <div class="wrap">
       <div class="title">
-        <img src="icon-192.png" width="28" height="28" style="border-radius:6px" alt="icon"/>
-        <h1>Boolean Games <span class="pill">PWA • offline</span></h1>
+        <img src="icon-192.png" alt="" width="28" height="28" style="border-radius:8px"/>
+        <h1>Boolean Games <span class="legend">PWA • offline</span></h1>
       </div>
       <nav>
-        <button onclick="show('home')">🏠 Home</button>
-        <button onclick="show('vf')">🧮 Verità o Falso</button>
-        <button onclick="show('kmap')">🗺️ K-map (3 variabili)</button>
-        <button onclick="show('sat')">🧩 SAT 3-CNF</button>
-        <button onclick="show('kmap4')">🗺️ K-map (4 variabili)</button>
-        <button onclick="show('qm')">🧠 Quine–McCluskey</button>
-        <button onclick="show('circuit')">🔌 Circuiti logici</button>
+        <a class="btn" href="#home" onclick="show('home')">🏠 Home</a>
+        <a class="btn" href="#vf" onclick="show('vf')">🧮 Verità o Falso</a>
+        <a class="btn" href="#kmap" onclick="show('kmap')">🗺️ K-map (3 variabili)</a>
+        <a class="btn" href="#sat" onclick="show('sat')">🧩 SAT 3-CNF</a>
+        <a class="btn" href="#kmap4" onclick="show('kmap4')">🗺️ K-map (4 variabili)</a>
+        <a class="btn" href="#qm" onclick="show('qm')">🧠 Quine–McCluskey</a>
+        <a class="btn" href="#circuit" onclick="show('circuit')">🔌 Circuiti logici</a>
       </nav>
     </div>
   </header>
 
   <main class="wrap">
+    <!-- HOME -->
     <section id="home" class="section active">
       <div class="card grid">
         <div>
-          <div class="big">Sei mini-giochi sulla logica booleana.</div>
+          <h2>Sei mini-giochi sulla logica booleana.</h2>
           <ul>
-            <li><strong>Verità o Falso</strong> — valuta un'espressione su A,B,C.</li>
-            <li><strong>Karnaugh 3v</strong> — mappa 2×4 (BC in Gray: 00,01,11,10).</li>
-            <li><strong>SAT 3-CNF</strong> — imposta A,B,C per soddisfare tutte le clausole.</li>
-            <li><strong>Karnaugh 4v</strong> — mappa 4×4 (AB/CD in Gray).</li>
-            <li><strong>Quine–McCluskey</strong> — minimizzazione fino a 4 variabili con passaggi.</li>
-            <li><strong>Circuiti</strong> — porte AND/OR/NOT/XOR collegabili, simulazione live.</li>
+            <li><b>Verità o Falso</b> — valuta un'espressione su A,B,C.</li>
+            <li><b>Karnaugh 3v</b> — mappa 2×4 (BC in Gray: 00,01,11,10).</li>
+            <li><b>SAT 3-CNF</b> — imposta A,B,C per soddisfare tutte le clausole.</li>
+            <li><b>Karnaugh 4v</b> — mappa 4×4 (AB/CD in Gray).</li>
+            <li><b>Quine–McCluskey</b> — minimizzazione fino a 4 variabili, con passaggi.</li>
+            <li><b>Circuiti</b> — porte AND/OR/NOT/XOR collegabili, simulazione live.</li>
           </ul>
-          <div class="row"><span>Totale: <strong id="scoreTotal">0</strong> • Best: <strong id="scoreBest">0</strong></span><button onclick="resetBest()">Azzera Best</button></div>
+          <div class="legend">Totale: <span id="scoreTotal">0</span> · Best: <span id="scoreBest">0</span>
+            <button class="btn" onclick="resetBest()">Azzera Best</button>
+          </div>
         </div>
+
+        <details class="guide">
+          <summary>📘 Legenda simboli logici</summary>
+          <table class="legend" style="width:100%;border-collapse:separate;border-spacing:0 6px">
+            <tr><td class="mono">∧</td><td><b>AND (E)</b></td><td>Vero se <i>entrambi</i> sono veri.</td></tr>
+            <tr><td class="mono">∨</td><td><b>OR (O)</b></td><td>Vero se <i>almeno uno</i> è vero.</td></tr>
+            <tr><td class="mono">¬</td><td><b>NOT (NON)</b></td><td>Inverte il valore (0↔1).</td></tr>
+            <tr><td class="mono">⊕</td><td><b>XOR</b></td><td>Vero se sono <i>diversi</i>.</td></tr>
+            <tr><td class="mono">→</td><td><b>Implicazione</b></td><td>Falsa solo se sinistra=1 e destra=0.</td></tr>
+            <tr><td class="mono">↔</td><td><b>Equivalenza</b></td><td>Vera se i due valori sono uguali.</td></tr>
+          </table>
+        </details>
+
+        <details class="guide">
+          <summary>📗 Cos'è l’Ordine Gray?</summary>
+          <p>
+            L’<b>ordine Gray</b> elenca le combinazioni binarie in modo che ogni passaggio cambi un solo bit.
+            Per 2 bit la sequenza è <span class="mono">00 → 01 → 11 → 10</span>.
+            Nelle mappe di Karnaugh si usa questo ordine per righe/colonne
+            così celle adiacenti differiscono per una sola variabile: è perfetto per
+            trovare <em>gruppi di 1</em> e semplificare le funzioni.
+          </p>
+        </details>
       </div>
     </section>
 
+    <!-- VERITA/FALSO -->
     <section id="vf" class="section">
       <div class="card grid">
-        <div class="row"><button onclick="VF.newRound()">Nuovo</button><button onclick="VF.hint()">Hint</button></div>
-        <div class="row big mono"><span>Assegnazione:</span><span id="vfAssign"></span></div>
-        <div class="big mono" id="vfExpr"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="VF.newRound()">Nuovo</button>
+          <button class="btn" onclick="VF.hint()">Hint</button>
+        </div>
+        <div class="mono">Assegnazione: <span id="vfAssign"></span></div>
+        <div class="mono" id="vfExpr"></div>
         <div id="vfHint" class="legend"></div>
-        <div class="row"><button onclick="VF.answer(true)">Vero</button><button onclick="VF.answer(false)">Falso</button></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="VF.answer(true)">Vero</button>
+          <button class="btn" onclick="VF.answer(false)">Falso</button>
+        </div>
         <div id="vfFeedback"></div>
 
-<details class="guide">
-  <summary>📘 Spiegazione (come si risolve)</summary>
-  <p><strong>Obiettivo:</strong> decidere se l'espressione booleana è <em>vera</em> o <em>falsa</em> per i valori indicati di <code>A</code>, <code>B</code>, <code>C</code>.</p>
-  <ol>
-    <li>Sostituisci ai simboli le cifre: 1 = Vero, 0 = Falso.</li>
-    <li>Calcola dentro le parentesi e procedi verso l'esterno.</li>
-    <li>Regole: <span class="mono">AND (∧)</span> è 1 solo se entrambi 1; <span class="mono">OR (∨)</span> è 1 se almeno uno è 1; <span class="mono">NOT (¬)</span> inverte; <span class="mono">XOR (⊕)</span> è 1 se sono diversi; <span class="mono">→</span> è falsa solo se sinistra=1 e destra=0.</li>
-  </ol>
-  <p><strong>Esempio svolto.</strong> Espr.: <code>(A ∧ B) → ¬C</code>, valori: <code>A=1, B=0, C=1</code> →
-    <span class="mono">(1 ∧ 0)=0</span>, <span class="mono">¬1=0</span>, quindi <span class="mono">(0 → 0)=1</span> → <strong>Vero</strong>.</p>
-  <p class="muted">Tip: <em>Hint</em> mostra la formula annotata con <span class="mono">T/F</span> passo passo.</p>
-</details>
-
+        <details class="guide">
+          <summary>📘 Spiegazione (come si risolve)</summary>
+          <p><strong>Obiettivo:</strong> decidere se l'espressione booleana è <em>vera</em> o <em>falsa</em> per i valori indicati di <code>A</code>, <code>B</code>, <code>C</code>.</p>
+          <ol>
+            <li>Sostituisci ai simboli le cifre: 1 = Vero, 0 = Falso.</li>
+            <li>Calcola dentro le parentesi e procedi verso l'esterno.</li>
+            <li>Regole: <span class="mono">AND (∧)</span> è 1 solo se entrambi 1; <span class="mono">OR (∨)</span> è 1 se almeno uno è 1; <span class="mono">NOT (¬)</span> inverte; <span class="mono">XOR (⊕)</span> è 1 se sono diversi; <span class="mono">→</span> è falsa solo se sinistra=1 e destra=0.</li>
+          </ol>
+          <p><strong>Esempio svolto.</strong> Espr.: <code>(A ∧ B) → ¬C</code>, valori: <code>A=1, B=0, C=1</code> →
+            <span class="mono">(1 ∧ 0)=0</span>, <span class="mono">¬1=0</span>, quindi <span class="mono">(0 → 0)=1</span> → <strong>Vero</strong>.</p>
+          <p class="muted">Tip: <em>Hint</em> mostra la formula annotata con <span class="mono">T/F</span> passo passo.</p>
+        </details>
       </div>
     </section>
 
+    <!-- KMAP 3 -->
     <section id="kmap" class="section">
       <div class="card grid">
-        <div class="row"><button onclick="KMAP.newPuzzle()">Nuovo</button><button onclick="KMAP.hint()">Hint</button><button onclick="KMAP.check()">Check</button><button onclick="KMAP.solve()">Soluzione</button><button onclick="KMAP.clear()">Pulisci</button></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="KMAP.newPuzzle()">Nuovo</button>
+          <button class="btn" onclick="KMAP.hint()">Hint</button>
+          <button class="btn" onclick="KMAP.check()">Check</button>
+          <button class="btn" onclick="KMAP.solve()">Soluzione</button>
+          <button class="btn" onclick="KMAP.clear()">Pulisci</button>
+        </div>
         <div class="legend">Variabili: A (righe), B C (colonne in Gray: 00,01,11,10)</div>
-        <div class="spacer"></div>
         <div class="kmap" id="kmapGrid"></div>
-        <div class="spacer"></div>
         <div class="mono">Funzione: <span id="kmapExpr"></span></div>
         <div id="kmapMsg"></div>
 
-<details class="guide">
-  <summary>📘 Spiegazione</summary>
-  <p><strong>Cos'è:</strong> mappa di Karnaugh 2×4 per <code>A</code>, <code>B</code>, <code>C</code>. Ogni cella è una combinazione di valori.</p>
-  <ul>
-    <li>Righe = <code>A</code> (0 in alto, 1 in basso).</li>
-    <li>Colonne = <code>BC</code> in <em>ordine Gray</em>: 00, 01, 11, 10 (tra colonne adiacenti cambia un solo bit).</li>
-  </ul>
-  <p><strong>Come risolvere:</strong></p>
-  <ol>
-    <li>Leggi la <em>Funzione</em> (es. <span class="mono">A ∧ C</span>).</li>
-    <li>Per ogni cella chiediti: con quei <code>A,B,C</code> la funzione vale 1? Se sì, clicca e metti 1; altrimenti 0.</li>
-    <li>Usa <em>Check</em> per verificare; <em>Hint</em> corregge una cella; <em>Soluzione</em> compila tutto.</li>
-  </ol>
-  <p><strong>Esempio.</strong> Funzione: <span class="mono">A ∧ C</span>. Metti 1 nelle celle dove <span class="mono">A=1</span> e <span class="mono">C=1</span> (B non conta).</p>
-  <p class="muted">L'ordine Gray è utile per i raggruppamenti quando si semplifica.</p>
-</details>
+        <details class="guide">
+          <summary>📘 Spiegazione</summary>
+          <p><strong>Cos'è:</strong> mappa di Karnaugh 2×4 per <code>A</code>, <code>B</code>, <code>C</code>. Ogni cella è una combinazione di valori.</p>
+          <ul>
+            <li>Righe = <code>A</code> (0 in alto, 1 in basso).</li>
+            <li>Colonne = <code>BC</code> in <em>ordine Gray</em>: 00, 01, 11, 10 (tra colonne adiacenti cambia un solo bit).</li>
+          </ul>
+          <p><strong>Come risolvere:</strong></p>
+          <ol>
+            <li>Leggi la <em>Funzione</em> (es. <span class="mono">A ∧ C</span>).</li>
+            <li>Per ogni cella chiediti: con quei <code>A,B,C</code> la funzione vale 1? Se sì, clicca e metti 1; altrimenti 0.</li>
+            <li>Usa <em>Check</em> per verificare; <em>Hint</em> corregge una cella; <em>Soluzione</em> compila tutto.</li>
+          </ol>
+          <p><strong>Esempio.</strong> Funzione: <span class="mono">A ∧ C</span>. Metti 1 nelle celle dove <span class="mono">A=1</span> e <span class="mono">C=1</span> (B non conta).</p>
+          <p class="muted">L'ordine Gray è utile per i raggruppamenti quando si semplifica.</p>
+        </details>
 
+        <details class="guide">
+          <summary>📗 Cos'è l’Ordine Gray?</summary>
+          <p>L’ordine Gray per due bit è <span class="mono">00, 01, 11, 10</span>: passando da una colonna alla successiva cambia un solo bit.
+          Così due celle vicine rappresentano combinazioni quasi uguali e puoi unire i loro 1 per ridurre la funzione.</p>
+        </details>
       </div>
     </section>
 
+    <!-- SAT -->
     <section id="sat" class="section">
       <div class="card grid">
-        <div class="row"><button onclick="SAT.newPuzzle()">Nuovo</button><button onclick="SAT.hint()">Hint</button><button onclick="SAT.reset()">Reset</button></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="SAT.newPuzzle()">Nuovo</button>
+          <button class="btn" onclick="SAT.hint()">Hint</button>
+          <button class="btn" onclick="SAT.reset()">Reset</button>
+        </div>
         <div class="toggles">
-          <label class="toggle"><input type="checkbox" id="satA" onchange="SAT.update()">A</label>
-          <label class="toggle"><input type="checkbox" id="satB" onchange="SAT.update()">B</label>
-          <label class="toggle"><input type="checkbox" id="satC" onchange="SAT.update()">C</label>
+          <label class="toggle"><input type="checkbox" id="satA" onchange="SAT.update()"> A</label>
+          <label class="toggle"><input type="checkbox" id="satB" onchange="SAT.update()"> B</label>
+          <label class="toggle"><input type="checkbox" id="satC" onchange="SAT.update()"> C</label>
         </div>
         <div class="clauses" id="satClauses"></div>
         <div id="satMsg"></div>
 
-<details class="guide">
-  <summary>📘 Spiegazione</summary>
-  <p><strong>Che cos'è:</strong> un'istanza di <em>3-CNF SAT</em>. Ogni clausola è del tipo <span class="mono">(X ∨ Y ∨ Z)</span> ed è vera se <em>almeno una</em> delle tre parti è vera.</p>
-  <p><strong>Obiettivo:</strong> impostare <code>A</code>, <code>B</code>, <code>C</code> in modo che <em>tutte</em> le clausole diventino verdi.</p>
-  <ol>
-    <li>Scegli una clausola rossa, es. <span class="mono">(A ∨ ¬B ∨ C)</span>.</li>
-    <li>Valuta i tre pezzi con i valori attuali (se <span class="mono">B=1</span>, allora <span class="mono">¬B=0</span>).</li>
-    <li>Se tutti e tre valgono 0, cambia una variabile che la rende 1 (qui: <span class="mono">A=1</span> oppure <span class="mono">C=1</span> o <span class="mono">B=0</span>).</li>
-  </ol>
-  <p><strong>Esempio.</strong> Clausole: <span class="mono">(A ∨ ¬B ∨ C)</span>, <span class="mono">(¬A ∨ B ∨ C)</span>. Con <span class="mono">A=1, B=0, C=1</span> entrambe sono vere.</p>
-</details>
-
+        <details class="guide">
+          <summary>📘 Spiegazione</summary>
+          <p><strong>Che cos'è:</strong> un'istanza di <em>3-CNF SAT</em>. Ogni clausola è del tipo <span class="mono">(X ∨ Y ∨ Z)</span> ed è vera se <em>almeno una</em> delle tre parti è vera.</p>
+          <p><strong>Obiettivo:</strong> impostare <code>A</code>, <code>B</code>, <code>C</code> in modo che <em>tutte</em> le clausole diventino verdi.</p>
+          <ol>
+            <li>Scegli una clausola rossa, es. <span class="mono">(A ∨ ¬B ∨ C)</span>.</li>
+            <li>Valuta i tre pezzi con i valori attuali (se <span class="mono">B=1</span>, allora <span class="mono">¬B=0</span>).</li>
+            <li>Se tutti e tre valgono 0, cambia una variabile che la rende 1 (qui: <span class="mono">A=1</span> oppure <span class="mono">C=1</span> o <span class="mono">B=0</span>).</li>
+          </ol>
+          <p><strong>Esempio.</strong> Clausole: <span class="mono">(A ∨ ¬B ∨ C)</span>, <span class="mono">(¬A ∨ B ∨ C)</span>. Con <span class="mono">A=1, B=0, C=1</span> entrambe sono vere.</p>
+        </details>
       </div>
     </section>
 
+    <!-- KMAP 4 -->
     <section id="kmap4" class="section">
       <div class="card grid">
-        <div class="row"><button onclick="KMAP4.newPuzzle()">Nuovo</button><button onclick="KMAP4.hint()">Hint</button><button onclick="KMAP4.check()">Check</button><button onclick="KMAP4.solve()">Soluzione</button><button onclick="KMAP4.clear()">Pulisci</button></div>
-        <div class="legend">Variabili: AB (righe Gray: 00,01,11,10) • CD (colonne Gray: 00,01,11,10)</div>
-        <div class="spacer"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="KMAP4.newPuzzle()">Nuovo</button>
+          <button class="btn" onclick="KMAP4.hint()">Hint</button>
+          <button class="btn" onclick="KMAP4.check()">Check</button>
+          <button class="btn" onclick="KMAP4.solve()">Soluzione</button>
+          <button class="btn" onclick="KMAP4.clear()">Pulisci</button>
+        </div>
+        <div class="legend">Variabili: AB (righe Gray: 00,01,11,10) · CD (colonne Gray: 00,01,11,10)</div>
         <div class="kmap kmap4" id="kmap4Grid"></div>
-        <div class="spacer"></div>
         <div class="mono">Funzione: <span id="kmap4Expr"></span></div>
         <div id="kmap4Msg"></div>
 
-<details class="guide">
-  <summary>📘 Spiegazione</summary>
-  <p><strong>Cos'è:</strong> mappa di Karnaugh 4×4 per <code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>.</p>
-  <ul>
-    <li>Righe = <code>AB</code> in Gray: 00, 01, 11, 10.</li>
-    <li>Colonne = <code>CD</code> in Gray: 00, 01, 11, 10.</li>
-  </ul>
-  <ol>
-    <li>Leggi la <em>Funzione</em> (es. <span class="mono">B ∨ D</span>).</li>
-    <li>Metti 1 nelle celle dove la funzione è vera (qui: quando <span class="mono">B=1</span> o <span class="mono">D=1</span>).</li>
-    <li><em>Check</em> verifica; <em>Hint</em> corregge una cella.</li>
-  </ol>
-  <p class="muted">Le adiacenze (anche ai bordi) servono per trovare gruppi di 1 (2,4,8,...) e semplificare.</p>
-</details>
+        <details class="guide">
+          <summary>📘 Spiegazione</summary>
+          <p><strong>Cos'è:</strong> mappa di Karnaugh 4×4 per <code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>.</p>
+          <ul>
+            <li>Righe = <code>AB</code> in Gray: 00, 01, 11, 10.</li>
+            <li>Colonne = <code>CD</code> in Gray: 00, 01, 11, 10.</li>
+          </ul>
+          <ol>
+            <li>Leggi la <em>Funzione</em> (es. <span class="mono">B ∨ D</span>).</li>
+            <li>Metti 1 nelle celle dove la funzione è vera (qui: quando <span class="mono">B=1</span> o <span class="mono">D=1</span>).</li>
+            <li><em>Check</em> verifica; <em>Hint</em> corregge una cella.</li>
+          </ol>
+          <p class="muted">Le adiacenze (anche ai bordi) permettono di trovare gruppi 1-2-4-8 e semplificare.</p>
+        </details>
 
+        <details class="guide">
+          <summary>📗 Ordine Gray (ripasso)</summary>
+          <p>Per due bit: <span class="mono">00, 01, 11, 10</span>. Per <code>AB</code> lo applichiamo alle righe; per <code>CD</code> alle colonne.
+          Le celle ai bordi sono adiacenti (alto/basso, sinistra/destra), quindi anche i gruppi possono “avvolgere”.</p>
+        </details>
       </div>
     </section>
 
+    <!-- QM -->
     <section id="qm" class="section">
       <div class="card grid">
-        <div class="row">
-          <button onclick="QM.newRandom(4)">Nuovo (4 variabili)</button>
-          <button onclick="QM.newRandom(3)">Nuovo (3 variabili)</button>
-          <button onclick="QM.showSteps()">Mostra passaggi</button>
-          <button onclick="QM.copyResult()">Copia risultato</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="QM.newRandom(4)">Nuovo (4 variabili)</button>
+          <button class="btn" onclick="QM.newRandom(3)">Nuovo (3 variabili)</button>
+          <button class="btn" onclick="QM.showSteps()">Mostra passaggi</button>
+          <button class="btn" onclick="QM.copyResult()">Copia risultato</button>
         </div>
-        <div class="legend">Minimizzazione con implicanti primi ed essenziali. Variabili: A..D.</div>
-        <div class="mono">Minterms: <span id="qmMinterms"></span> <span id="qmDontcares"></span></div>
-        <div class="mono">Forma minima: <span id="qmResult"></span></div>
-        <details id="qmStepsBox"><summary>Passaggi</summary>
+        <div class="legend">Minimizzazione con implicanti primi ed essenziali. Variabili: <span class="mono">A..D</span>.</div>
+        <div>Minterms: <span id="qmMinterms"></span> <span id="qmDontcares"></span></div>
+        <div>Forma minima: <span id="qmResult" class="mono"></span></div>
+        <details id="qmStepsBox" class="card" style="margin-top:8px">
+          <summary>Passaggi</summary>
           <pre id="qmSteps" class="mono" style="white-space:pre-wrap"></pre>
         </details>
 
-<details class="guide">
-  <summary>📘 Spiegazione</summary>
-  <p><strong>Obiettivo:</strong> ottenere la <em>forma minima</em> di una funzione partendo dai <em>minterms</em> (le combinazioni che valgono 1).</p>
-  <ol>
-    <li><strong>Binario:</strong> scrivi ogni minterm in binario con N bit.</li>
-    <li><strong>Raggruppa</strong> per numero di 1 (0,1,2,...).</li>
-    <li><strong>Combina</strong> coppie che differiscono per un solo bit → sostituisci quel bit con “-”.</li>
-    <li>Quelli non più combinabili sono <em>implicanti primi</em>.</li>
-    <li>Costruisci la tabella coperture e scegli gli <em>implicanti essenziali</em>.</li>
-    <li>Copri i restanti minterms con il minor numero di implicanti.</li>
-    <li><strong>Traduci</strong> le maschere in termini: 1 = variabile, 0 = negazione, - = assente. Es.: <span class="mono">01-1</span> → <span class="mono">¬A ∧ B ∧ D</span>.</li>
-  </ol>
-  <p><strong>Mini-esempio (3 variabili):</strong> minterms {1,3,5,7} → implicanti <span class="mono">-1-</span> e <span class="mono">--1</span> → forma minima <span class="mono">B ∨ C</span>.</p>
-</details>
+        <details class="guide">
+          <summary>📘 Spiegazione</summary>
+          <p><strong>Obiettivo:</strong> ottenere la <em>forma minima</em> di una funzione partendo dai <em>minterms</em> (le combinazioni che valgono 1).</p>
+          <ol>
+            <li><strong>Binario:</strong> scrivi ogni minterm in binario con N bit.</li>
+            <li><strong>Raggruppa</strong> per numero di 1 (0,1,2,...).</li>
+            <li><strong>Combina</strong> coppie che differiscono per un solo bit → sostituisci quel bit con “-”.</li>
+            <li>Quelli non più combinabili sono <em>implicanti primi</em>.</li>
+            <li>Costruisci la tabella coperture e scegli gli <em>implicanti essenziali</em>.</li>
+            <li>Copri i restanti minterms con il minor numero di implicanti.</li>
+            <li><strong>Traduci</strong> le maschere in termini: 1 = variabile, 0 = negazione, - = assente. Es.: <span class="mono">01-1</span> → <span class="mono">¬A ∧ B ∧ D</span>.</li>
+          </ol>
+          <p><strong>Mini-esempio (3 variabili):</strong> minterms {1,3,5,7} → implicanti <span class="mono">-1-</span> e <span class="mono">--1</span> → forma minima <span class="mono">B ∨ C</span>.</p>
+        </details>
       </div>
     </section>
 
+    <!-- CIRCUIT -->
     <section id="circuit" class="section">
       <div class="card grid">
-        <div class="row">
-          <div class="toggles">
-            <label class="toggle"><input type="checkbox" id="inA" onchange="CIRCUIT.update()">A</label>
-            <label class="toggle"><input type="checkbox" id="inB" onchange="CIRCUIT.update()">B</label>
-            <label class="toggle"><input type="checkbox" id="inC" onchange="CIRCUIT.update()">C</label>
-            <label class="toggle"><input type="checkbox" id="inD" onchange="CIRCUIT.update()">D</label>
-          </div>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="inA" onchange="CIRCUIT.update()"> A</label>
+          <label class="toggle"><input type="checkbox" id="inB" onchange="CIRCUIT.update()"> B</label>
+          <label class="toggle"><input type="checkbox" id="inC" onchange="CIRCUIT.update()"> C</label>
+          <label class="toggle"><input type="checkbox" id="inD" onchange="CIRCUIT.update()"> D</label>
         </div>
-        <div class="row">
-          <button onclick="CIRCUIT.addGate('AND')">+ AND</button>
-          <button onclick="CIRCUIT.addGate('OR')">+ OR</button>
-          <button onclick="CIRCUIT.addGate('NOT')">+ NOT</button>
-          <button onclick="CIRCUIT.addGate('XOR')">+ XOR</button>
-          <button onclick="CIRCUIT.reset()">Reset</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="CIRCUIT.addGate('AND')">+ AND</button>
+          <button class="btn" onclick="CIRCUIT.addGate('OR')">+ OR</button>
+          <button class="btn" onclick="CIRCUIT.addGate('NOT')">+ NOT</button>
+          <button class="btn" onclick="CIRCUIT.addGate('XOR')">+ XOR</button>
+          <button class="btn" onclick="CIRCUIT.reset()">Reset</button>
         </div>
         <div class="legend">Collega ingressi dal menu a tendina. Valori calcolati in tempo reale.</div>
-        <div id="canvas" style="position:relative;height:420px;border:1px dashed #334155;border-radius:12px;background:#0b1220;overflow:hidden"></div>
-        <div class="row">
-          <label class="toggle">Output osservato:
-            <select id="outSelect" onchange="CIRCUIT.update()"></select>
-          </label>
-          <div id="outValue" class="mono"></div>
+        <div id="canvas" style="position:relative;height:320px;border:1px dashed #334155;border-radius:12px"></div>
+        <div class="spacer"></div>
+        <div>Output osservato: 
+          <select id="outSelect" onchange="CIRCUIT.update()"></select>
+          <span id="outValue" class="mono" style="margin-left:8px"></span>
         </div>
         <div id="circuitMsg" class="legend"></div>
         <div id="tt"></div>
 
-<details class="guide">
-  <summary>📘 Spiegazione</summary>
-  <p><strong>Costruisci un circuito</strong> aggiungendo porte <span class="mono">AND</span>, <span class="mono">OR</span>, <span class="mono">NOT</span>, <span class="mono">XOR</span> e collegando gli ingressi dal menu a tendina. Puoi usare come ingressi anche l’uscita di altre porte.</p>
-  <ul>
-    <li><strong>AND</strong>: 1 solo se <em>tutti</em> gli ingressi sono 1.</li>
-    <li><strong>OR</strong>: 1 se <em>almeno uno</em> è 1.</li>
-    <li><strong>NOT</strong>: inverte (0→1, 1→0).</li>
-    <li><strong>XOR</strong>: 1 se gli ingressi sono <em>diversi</em>.</li>
-  </ul>
-  <p>Seleziona l’<em>Output osservato</em> in basso per vedere il valore corrente e la <em>tabella della verità</em> completa.</p>
-  <p><strong>Esempio rapido.</strong> Crea <span class="mono">G1 = AND(A,B)</span> e poi <span class="mono">G2 = XOR(G1,C)</span>. L’uscita è 1 quando esattamente uno tra <span class="mono">G1</span> e <span class="mono">C</span> è 1; e <span class="mono">G1</span> è 1 solo se <span class="mono">A=1</span> e <span class="mono">B=1</span>.</p>
-</details>
-
+        <details class="guide">
+          <summary>📘 Spiegazione</summary>
+          <p><strong>Costruisci un circuito</strong> aggiungendo porte <span class="mono">AND</span>, <span class="mono">OR</span>, <span class="mono">NOT</span>, <span class="mono">XOR</span> e collegando gli ingressi dal menu a tendina. Puoi usare come ingressi anche l’uscita di altre porte.</p>
+          <ul>
+            <li><strong>AND</strong>: 1 solo se <em>tutti</em> gli ingressi sono 1.</li>
+            <li><strong>OR</strong>: 1 se <em>almeno uno</em> è 1.</li>
+            <li><strong>NOT</strong>: inverte (0→1, 1→0).</li>
+            <li><strong>XOR</strong>: 1 se gli ingressi sono <em>diversi</em>.</li>
+          </ul>
+          <p>Seleziona l’<em>Output osservato</em> in basso per vedere il valore corrente e la <em>tabella della verità</em> completa.</p>
+          <p><strong>Esempio rapido.</strong> Crea <span class="mono">G1 = AND(A,B)</span> e poi <span class="mono">G2 = XOR(G1,C)</span>. L’uscita è 1 quando esattamente uno tra <span class="mono">G1</span> e <span class="mono">C</span> è 1; e <span class="mono">G1</span> è 1 solo se <span class="mono">A=1</span> e <span class="mono">B=1</span>.</p>
+        </details>
       </div>
     </section>
-
-    <footer><p class="legend">© 2025 PezzaliAPP • MIT</p></footer>
   </main>
 
+  <footer class="wrap legend">© 2025 PezzaliAPP · MIT</footer>
+
   <script src="app.js"></script>
+  <script>
+    function show(id){
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      // aggiorna punteggio quando si cambia sezione
+      if (typeof updateScore === 'function') updateScore();
+      location.hash = id;
+    }
+    window.addEventListener('hashchange', () => {
+      const id = location.hash.replace('#','') || 'home';
+      show(id);
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+      const id = location.hash.replace('#','') || 'home';
+      show(id);
+    });
+  </script>
 </body>
 </html>
